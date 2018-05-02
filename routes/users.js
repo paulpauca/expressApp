@@ -46,23 +46,45 @@ function record_data(req, res, next) {
 	console.log(req.body); // show in the console what the user entered
 	//usersModel.push(req.body); // Add the user data to the users_data dataset
 
-	// This block is for creating a PDF document
-	/*
-	const doc = new PDFDocument();
-	let name = req.body.name;
-	res.setHeader('Content-disposition', 'inline; filename="' + name + '"')
-  	res.setHeader('Content-type', 'application/pdf');
-  	doc.y = 300;
-  	doc.text(name, 50, 50);
-  	doc.pipe(res);
-  	doc.end();
-	*/
+	dbtools.saveUser(req.body);
+
+	showPDF(req.body, res);
+
+
 	
 	// Save to database
-	dbtools.saveUser(req.body, () => {
-		res.redirect('/users/addcharacter');
-	});
+	/*
+	*/
+}
 
+function showPDF(data, res) {
+	const doc = new PDFDocument();
+	let name = data.name;
+	res.setHeader('Content-disposition', 'inline; filename="' + name + '"')
+  	res.setHeader('Content-type', 'application/pdf');
+
+  	/*
+  	let template = {
+  		name: "Paul",
+  		docType: "patent",
+  		paragraph1: "The author, NAME, seeks a DOCTYPE for";
+  	}
+	*/
+
+    var inputs = [data.name, "patent"];
+	var paragraph = "This NAME is a person of interest for DOCTYPE and NAME";
+	var keys = ['NAME', 'DOCTYPE'];
+
+	for( var i = 0; i < keys.length; i++) {
+		var re = new RegExp(keys[i], 'g');
+		paragraph = paragraph.replace(re, inputs[i]);
+	}
+
+  	doc.y = 300;
+  	doc.text(paragraph, 50, 50);
+
+  	doc.pipe(res);
+  	doc.end();
 }
 
 // Export the router, required in app.js
